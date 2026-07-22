@@ -1,0 +1,25 @@
+name: Daily Activity Log
+on:
+  schedule:
+    - cron: '0 0 * * *'   # Runs daily at midnight UTC
+  workflow_dispatch:      # Allows you to click "Run" manually for INSTANT activity
+
+jobs:
+  update-log:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Generate Log Entry
+        run: |
+          echo "## Log Entry: $(date)" >> README.md
+          echo "Quote of the day: $(curl -s https://api.quotable.io/random | jq -r '.content')" >> README.md
+          echo "---" >> README.md
+      
+      - name: Commit & Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Daily update: $(date)" || echo "No changes to commit"
+          git push
